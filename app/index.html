@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soreadbrain — AI Project Management</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="logo">Soreadbrain</div>
+      <nav>
+        <a class="nav-item active" data-target="dashboard">Projects</a>
+        <a class="nav-item" data-target="tasks">Tasks</a>
+        <a class="nav-item" data-target="ai">AI Inbox</a>
+        <a class="nav-item" data-target="meetings">Meetings</a>
+        <a class="nav-item" data-target="recordings">Recordings</a>
+        <a class="nav-item" data-target="analytics">Analytics</a>
+        <a class="nav-item" data-target="settings">Settings</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="role-switch">
+          Role
+          <select id="roleSelect">
+            <option>Project Manager</option>
+            <option>Developer</option>
+            <option>Admin</option>
+          </select>
+        </div>
+        <div class="pill muted">v0.1 static prototype</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <input type="search" placeholder="Search projects, tasks, people" aria-label="Search" />
+        <div class="top-actions">
+          <button class="ghost" id="aiStandup">AI Daily Standup</button>
+          <button class="primary" id="aiCreate">AI Create Tasks</button>
+          <div class="avatar">PM</div>
+        </div>
+      </header>
+
+      <section class="grid" id="dashboard">
+        <div class="card stretch">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Portfolio health</p>
+              <h2>Projects</h2>
+            </div>
+            <button class="ghost" id="newProjectBtn">New Project</button>
+          </div>
+          <div id="projectList" class="list cards"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">AI Inbox</p>
+              <h2>Meeting to tasks</h2>
+            </div>
+            <button class="ghost" id="ingestMeetingBtn">Ingest Meeting</button>
+          </div>
+          <form id="meetingForm" class="stack">
+            <label>
+              Meeting summary
+              <textarea id="meetingSummary" rows="6" placeholder="Paste Google Meet summary text"></textarea>
+            </label>
+            <label>
+              Project
+              <select id="meetingProject"></select>
+            </label>
+            <button type="submit" class="primary">Generate tasks</button>
+            <p class="help">AI extracts action items, owners, deadlines, confidence, and flags unclear assignments.</p>
+          </form>
+          <div id="aiTasks" class="list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Developer mode</p>
+              <h2>Recording validation</h2>
+            </div>
+          </div>
+          <form id="recordingForm" class="stack">
+            <label>
+              Active task
+              <select id="recordingTask"></select>
+            </label>
+            <div class="inline">
+              <button type="button" class="primary" id="startRecording">Start session</button>
+              <button type="button" class="ghost" id="completeRecording">Complete</button>
+            </div>
+            <p class="help">AI analyzes duration, focus app usage, and suggests completion state for PM validation.</p>
+          </form>
+          <div id="recordingStatus" class="list"></div>
+        </div>
+
+        <div class="card stretch">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Task pipeline</p>
+              <h2>Kanban view</h2>
+            </div>
+            <button class="ghost" id="newTaskBtn">Add Task</button>
+          </div>
+          <div class="kanban" id="kanban"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Daily stand-up</p>
+              <h2>AI summary</h2>
+            </div>
+          </div>
+          <div id="standup" class="stack"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Productivity</p>
+              <h2>Analytics snapshot</h2>
+            </div>
+          </div>
+          <div id="analytics" class="list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal hidden" id="projectModal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>New project</h3>
+        <button class="icon" data-close>✕</button>
+      </div>
+      <form id="projectForm" class="stack">
+        <label>Name <input id="projectName" required /></label>
+        <label>Description <textarea id="projectDesc" rows="3"></textarea></label>
+        <label>Owner <input id="projectOwner" placeholder="Owner name" /></label>
+        <label>Due date <input id="projectDue" type="date" /></label>
+        <button type="submit" class="primary">Create project</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="taskModal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3>New task</h3>
+        <button class="icon" data-close>✕</button>
+      </div>
+      <form id="taskForm" class="stack">
+        <label>Project <select id="taskProject" required></select></label>
+        <label>Title <input id="taskTitle" required /></label>
+        <label>Description <textarea id="taskDesc" rows="3"></textarea></label>
+        <label>Assignee <input id="taskAssignee" placeholder="Person" /></label>
+        <label>Due date <input id="taskDue" type="date" /></label>
+        <label>Priority
+          <select id="taskPriority">
+            <option>Medium</option>
+            <option>High</option>
+            <option>Low</option>
+          </select>
+        </label>
+        <label>Status
+          <select id="taskStatus">
+            <option>Not Started</option>
+            <option>In Progress</option>
+            <option>Blocked</option>
+            <option>Done</option>
+          </select>
+        </label>
+        <button type="submit" class="primary">Create task</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
